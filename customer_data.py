@@ -1,12 +1,13 @@
 from pyspark.sql import SparkSession
 from pyspark import SparkContext, SparkConf
+from pyspark import sql
 from pyspark.sql.functions import col, current_timestamp
 
 conf_spark = SparkConf().set("spark.driver.host", "127.0.0.1")
 spark = SparkSession.builder\
 			.appName('demo01')\
-			.config('spark.sql.shuffle.partitions', '4') \
 	        .master('local') \
+	        .enableHiveSupport() \
 	        .getOrCreate()
 
 filepath = "hdfs://localhost:9000/lending_club_project/customer_data/part-00000-694b65c5-0b8f-4760-ac12-2b59978292e0-c000.csv"
@@ -28,6 +29,7 @@ df = df.withColumnRenamed('annual_inc',"annual_income") \
 df.printSchema()
 customer_df_renamed = df.withColumn("ingest_date",current_timestamp())
 customer_df_renamed.printSchema()
-print(customer_df_renamed.count())
-customer_distinct = customer_df_renamed.distinct().count()
-print(customer_distinct)
+
+customer_distinct = customer_df_renamed.distinct()
+customer_distinct.createOrReplaceTempView("customer")
+spark.sql("select count(*) from customer where annual_income is null").show()

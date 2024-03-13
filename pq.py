@@ -11,6 +11,7 @@ filepath = "hdfs://localhost:9000/lending_club_project/accepted_2007_to_2018Q4.c
 df = spark.read \
 	.format("csv") \
     .option("header", "true") \
-    .option("inferSchema", "true") \
+	.option("mode","permissive")\
+    .option("inferSchema", "True") \
 	.load()
 df.printSchema()
